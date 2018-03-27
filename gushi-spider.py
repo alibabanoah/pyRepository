@@ -3,6 +3,9 @@ import urllib.request
 import re
 print('开始请求数据......')
 
+tangshiURL = "http://so.gushiwen.org/shiwen2017/ajaxshangxi.aspx"
+rongchiURL = "http://so.gushiwen.org/shiwen2017/ajaxshangxi.aspx"
+
 def getgushiID():
     gushiID = 787,798,938
     return gushiID
