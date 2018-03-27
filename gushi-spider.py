@@ -1,3 +1,5 @@
+# *-* coding:utf-8 *-*
+from bs4 import BeautifulSoup
 import urllib.parse
 import urllib.request
 import re
@@ -29,4 +31,12 @@ def getHtml(url,values):
     html = response_result.decode('utf-8')
     return html
 
-print(requestgushiwen())
+def shangxiParser(): #解析赏析
+    shagnxi = requestgushiwen()
+    soup = BeautifulSoup(shagnxi, 'html.parser')
+    asoup = soup.getText()
+
+    for string in soup.stripped_strings:
+        print(repr(string),'<----')
+
+print(shangxiParser())
