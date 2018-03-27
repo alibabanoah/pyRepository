@@ -3,6 +3,11 @@ import urllib.request
 import re
 print('开始请求数据......')
 
+def getgushiID():
+    gushiID = 787,798,938
+    return gushiID
+
+
 def requestgushiwen():
     print('请求数据')
     url = 'http://so.gushiwen.org/shiwen2017/ajaxshangxi.aspx'
