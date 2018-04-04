@@ -3,6 +3,15 @@ from bs4 import BeautifulSoup
 import urllib.parse
 import urllib.request
 import re
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+import MySQLdb
+
+dbname="www.ifamilyedu.com"
+dbuser="root"
+dbpass="848a2f3a"
+dbtable=""
+
 
 ListgushiwenURL = []
 ListshiwendetailURL = []
@@ -30,7 +39,7 @@ def getgushiID():
 def requesturl(url,par):
     print('请求数据')
     value= {
-         'id':787,
+         'id':par,
     }
     result = getHtml(url,value)
     return result
@@ -51,19 +60,36 @@ def URLParser():
             if link.get('href')[1:8] == "shiwenv":
                 ListshiwendetailURL.append(link.get('href'))
 URLParser()
+print(len(ListshiwendetailURL))
+
+
 
 def CommentParser(): #解析译文与赏析
     #for link in ListshiwendetailURL:
         #alllink = "https://so.gushiwen.org"+link
-        shagnxi = requesturl("https://so.gushiwen.org/shiwenv_85c1b0fcb6f9.aspx",par=None)
-        soup = BeautifulSoup(shagnxi, 'html.parser')
+        alllink = "https://so.gushiwen.org/shiwenv_cecffc2a400d.aspx"
+        print(alllink)
+        clickID = requesturl(alllink,par=None)
+        soup = BeautifulSoup(clickID, 'html.parser')
         s_soup=soup.find_all('div',attrs={"onclick":re.compile(r"shangxiShow.")})
         f_soup=soup.find_all('div',attrs={"onclick":re.compile(r"fanyiShow.")})
-        print(s_soup,'++++++++++++++++++++')
-        print(f_soup, '++++++++++++++++++++')
+        t_soup=soup.find_all('h1')
+
+        tempid_ = re.findall(r"shangxiShow\(\d+\)",s_soup.__str__())
+        sxid = re.findall(r"\d+",tempid_[0]) # 获得翻译ID
+        tempid_ = re.findall(r"fanyiShow\(\d+\)",f_soup.__str__())
+        fyid = re.findall(r"\d+",tempid_[0]) # 获得赏析ID
+
+        print(sxid[0],'-----',fyid[0])
+        print(t_soup.__str__())
+
+
+        #print(s_soup.stripped_strings,'++++++++++++++++++++')
+        #print(s_soup, '++++++++++++++++++++')
         #for string in soup.stripped_strings:
-        #    print(repr(string),'<----')
-        #print(URL[0],"新的")
+            #it = re.findall(r"shangxiShow\(\d+\)",string)
+            #id = re.findall(r"\d+",it[0])
+            #print(type(id),'<----')
 
 CommentParser()
 

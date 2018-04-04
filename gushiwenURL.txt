@@ -1,5 +1,1 @@
 http://so.gushiwen.org/gushi/tangshi.aspx,唐诗三百首
-http://so.gushiwen.org/gushi/sanbai.aspx,古诗三百首
-http://so.gushiwen.org/gushi/songsan.aspx,宋词三百首
-http://so.gushiwen.org/gushi/songci.aspx,宋词精选
-http://so.gushiwen.org/gushi/shijiu.aspx,古诗十九首
