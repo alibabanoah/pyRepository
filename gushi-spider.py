@@ -6,7 +6,7 @@ import re
 import ssl
 import time
 import MySQLdb
-import traceback
+#import traceback
 ssl._create_default_https_context = ssl._create_unverified_context
 
 dbname="www.ifamilyedu.com"
@@ -20,11 +20,10 @@ def dbinsert(pname,pcom,pfy):
     cursor = db.cursor()
     sql = 'insert into poetry_temp_com (pname,pcom,pfy) values ' \
           '(\''+pname+'\',\''+pcom+'\',\''+pfy+'\')'
-    print(sql,'sqlll')
     try:
-        print(sql, 'exexesfasfdasfasfd')
         cursor.execute(sql)
         db.commit()
+        print(sql, 'exexesfasfdasfasfd')
     except:
         traceback.print_exc()
 
@@ -43,11 +42,6 @@ GetListgushiwenURL() # Call function GetgushiwenURL to get URL data
 def genegushiURL():
     for listgushiURL in ListgushiwenURL:
         yield re.split(r'[,]',listgushiURL)
-
-for f in genegushiURL():
-    print(f[0],'本次打开第一层')
-
-
 
 def getgushiID():
     gushiID = 787,798,938
@@ -83,8 +77,8 @@ print(len(ListshiwendetailURL))
 def CommentParser(): #解析译文与赏析
     for link in ListshiwendetailURL:
         alllink = "https://so.gushiwen.org"+link
-        #alllink = "https://so.gushiwen.org/shiwenv_cecffc2a400d.aspx"
-        print(alllink,'<---------------------------------------------------all')
+        #alllink = "https://so.gushiwen.org/shiwenv_ed8b644fd298.aspx"
+        print(alllink,'<-------------------gushiURL')
         clickID = requesturl(alllink,par=None)
         soup = BeautifulSoup(clickID, 'html.parser')
         s_soup=soup.find_all('div',attrs={"onclick":re.compile(r"shangxiShow.")})
@@ -106,57 +100,75 @@ def CommentParser(): #解析译文与赏析
         print(fyid, "这里是ID--------")
 
         fy_sx(fyid=fyid,sxid=sxid,pname=t_pname,alllink=alllink)
-        time.sleep(100000)
+        time.sleep(3000)
 
-def fy_sx(fyid,sxid,pname,alllink):
-    fyurl = "https://so.gushiwen.org/shiwen2017/ajaxfanyi.aspx"
-    sxurl = "https://so.gushiwen.org/shiwen2017/ajaxshangxi.aspx"
-    fyfinal, sxfinal = '', ''
+def fy_sx(fyid,sxid,pname,alllink): # 获取赏析和翻译的文档 并 调用插入数据库
+    fyurl = "https://so.gushiwen.org/shiwen2017/ajaxfanyi.aspx" #设定翻译的URL
+    sxurl = "https://so.gushiwen.org/shiwen2017/ajaxshangxi.aspx" #设定赏析的URL
+    fyfinal, sxfinal = '',''
 
     if (fyid!=None):
         fycontent = requesturl(fyurl, par=fyid)
         fysoup = BeautifulSoup(fycontent, 'html.parser')
-        for string in fysoup.stripped_strings:
-            fyfinal = fyfinal + string + '</br>'
-        findstr1 = re.findall(r"有用\(\d+\)", fyfinal)
-        findstr2 = re.findall(r"没用\(\d+\)", fyfinal)
-        fyfinal = fyfinal.replace(findstr1[0], '')
-        fyfinal = fyfinal.replace(findstr2[0], '')
-        fyfinal = fyfinal.replace("▲", '')
-        print(fyfinal)
-    else:
+        if (len(fysoup)!=0):
+            for string in fysoup.stripped_strings:
+                fyfinal = fyfinal + string + '</br>'
+            findstr1 = re.findall(r"有用\(\d+\)", fyfinal)
+            findstr2 = re.findall(r"没用\(\d+\)", fyfinal)
+            fyfinal = fyfinal.replace(findstr1[0], '')
+            fyfinal = fyfinal.replace(findstr2[0], '')
+            fyfinal = fyfinal.replace("▲", '')
+            print(fyfinal)
+
+    else: #如果没有获取到 翻译文档的 展开阅读Onclick ID,则调用 getsimpfy 的方式获取
         fyfinal=getsimpfy(alllink)
 
     if (sxid!=None):
         sxcontent = requesturl(sxurl, par=sxid)
         sxsoup = BeautifulSoup(sxcontent, 'html.parser')
-        for string in sxsoup.stripped_strings:
-            sxfinal = sxfinal + string + '</br>'
-        findstr1 = re.findall(r"有用\(\d+\)", sxfinal)
-        findstr2 = re.findall(r"没用\(\d+\)", sxfinal)
-        sxfinal = sxfinal.replace(findstr1[0], '')
-        sxfinal = sxfinal.replace(findstr2[0], '')
-        sxfinal = sxfinal.replace("▲", '')
-        print(sxfinal)
-    else:
-        sxfinal=getsimpsx(alllink)
-    time.sleep(4)
-    #dbinsert(pname=pname,pcom=sxfinal,pfy=fyfinal)
+        if (len(sxsoup)!=0):
+            for string in sxsoup.stripped_strings:
+                sxfinal = sxfinal + string + '</br>'
+            findstr1 = re.findall(r"有用\(\d+\)", sxfinal)
+            findstr2 = re.findall(r"没用\(\d+\)", sxfinal)
+            sxfinal = sxfinal.replace(findstr1[0], '')
+            sxfinal = sxfinal.replace(findstr2[0], '')
+            sxfinal = sxfinal.replace("▲", '')
+            print(sxfinal)
 
-def getsimpfy(alllink):
+    else: #如果没有获取到 赏析文档的 展开阅读Onclick ID,则调用 getsimpsx 的方式获取
+        sxfinal=getsimpsx(alllink)
+
+    time.sleep(3)
+    dbinsert(pname=pname,pcom=sxfinal,pfy=fyfinal)
+
+def getsimpfy(alllink): #获取不需要展开的时候翻译的文档
     fycontent = requesturl(alllink, par=None)
     soup = BeautifulSoup(fycontent, 'html.parser')
     fysoup = soup.find_all('div', attrs={"class":"contyishang"})
-    print(type(fysoup),'这个好---',fysoup[1])
+    cont = ""
     for tg in fysoup:
-        print("--->",tg,"<---")
+        findstr3 = re.findall(r"译文及注释", str(tg))
+        if (len(findstr3)==1):
+            psoup_ = BeautifulSoup(str(tg), 'html.parser')
+            for pstring in psoup_.stripped_strings:
+                cont = cont + pstring + "</br>"
+    print(cont)
+    return cont
 
-
-    return "this is simpfydoc"
-
-def getsimpsx(alllink):
-    return "this is simpfydoc"
-
+def getsimpsx(alllink): #获取不需要展开的时候赏析的文档
+    sxcontent = requesturl(alllink, par=None)
+    soup = BeautifulSoup(sxcontent, 'html.parser')
+    sxsoup = soup.find_all('div', attrs={"class":"contyishang"})
+    cont = ""
+    for tg in sxsoup:
+        findstr3 = re.findall(r"赏析", str(tg))
+        if (len(findstr3)==1):
+            psoup_ = BeautifulSoup(str(tg), 'html.parser')
+            for pstring in psoup_.stripped_strings:
+                cont = cont + pstring + "</br>"
+    print(cont)
+    return cont
 
 CommentParser()
 
