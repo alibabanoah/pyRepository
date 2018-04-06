@@ -13,12 +13,12 @@ dbname="www.ifamilyedu.com"
 dbuser="root"
 dbpass="848a2f3a"
 dbbase="poetry"
-pname = "女冠子·四月十七"
+pname = ""
 db = MySQLdb.connect(dbname,dbuser,dbpass,dbbase,charset="utf8" )
 
 def dbinsert(pname,pcom,pfy):
     cursor = db.cursor()
-    sql = 'insert into poetry_temp_com (pname,pcom,pfy) values ' \
+    sql = 'insert into poetry_com (pname,pcom,pfy) values ' \
           '(\''+pname+'\',\''+pcom+'\',\''+pfy+'\')'
     try:
         cursor.execute(sql)
@@ -76,8 +76,8 @@ print(len(ListshiwendetailURL))
 
 def CommentParser(): #解析译文与赏析
     for link in ListshiwendetailURL:
-        #alllink = "https://so.gushiwen.org"+link
-        alllink = "https://so.gushiwen.org/shiwenv_ed8b644fd298.aspx"
+        alllink = "https://so.gushiwen.org"+link
+        #alllink = "https://so.gushiwen.org/shiwenv_ed8b644fd298.aspx"
         print(alllink,'<-------------------gushiURL')
         clickID = requesturl(alllink,par=None)
         soup = BeautifulSoup(clickID, 'html.parser')
@@ -100,7 +100,7 @@ def CommentParser(): #解析译文与赏析
         print(fyid, "这里是ID--------")
 
         fy_sx(fyid=fyid,sxid=sxid,pname=t_pname,alllink=alllink)
-        time.sleep(3000)
+        time.sleep(3)
 
 def fy_sx(fyid,sxid,pname,alllink): # 获取赏析和翻译的文档 并 调用插入数据库
     fyurl = "https://so.gushiwen.org/shiwen2017/ajaxfanyi.aspx" #设定翻译的URL
@@ -162,8 +162,7 @@ def getsimpfy(alllink): #获取不需要展开的时候翻译的文档
             for pstring in psoup_.stripped_strings:
                 cont = cont + pstring + "</br>"
 
-    findstr4 = re.findall(r"</br>展开阅读全文 ∨</br>",cont)
-    print(findstr4[0],'find-------')
+
     cont = cont.replace(r"</br>展开阅读全文 ∨</br>",'')
     cont = cont.replace(r"站务邮箱：service@gushiwen.org",'')
 
@@ -182,7 +181,6 @@ def getsimpsx(alllink): #获取不需要展开的时候赏析的文档
             for pstring in psoup_.stripped_strings:
                 cont = cont + pstring + "</br>"
 
-    findstr4 = re.findall(r"</br>展开阅读全文 ∨</br>",cont)
     cont = cont.replace(r"</br>展开阅读全文 ∨</br>",'')
     cont = cont.replace(r"站务邮箱：service@gushiwen.org",'')
     print(cont)
