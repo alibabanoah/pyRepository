@@ -76,8 +76,8 @@ print(len(ListshiwendetailURL))
 
 def CommentParser(): #解析译文与赏析
     for link in ListshiwendetailURL:
-        alllink = "https://so.gushiwen.org"+link
-        #alllink = "https://so.gushiwen.org/shiwenv_ed8b644fd298.aspx"
+        #alllink = "https://so.gushiwen.org"+link
+        alllink = "https://so.gushiwen.org/shiwenv_ed8b644fd298.aspx"
         print(alllink,'<-------------------gushiURL')
         clickID = requesturl(alllink,par=None)
         soup = BeautifulSoup(clickID, 'html.parser')
@@ -118,7 +118,11 @@ def fy_sx(fyid,sxid,pname,alllink): # 获取赏析和翻译的文档 并 调用�
             fyfinal = fyfinal.replace(findstr1[0], '')
             fyfinal = fyfinal.replace(findstr2[0], '')
             fyfinal = fyfinal.replace("▲", '')
+            fyfinal = fyfinal.replace(r"站务邮箱：service@gushiwen.org",'')
+
             print(fyfinal)
+        else:
+            fyfinal=getsimpfy(alllink)
 
     else: #如果没有获取到 翻译文档的 展开阅读Onclick ID,则调用 getsimpfy 的方式获取
         fyfinal=getsimpfy(alllink)
@@ -134,7 +138,11 @@ def fy_sx(fyid,sxid,pname,alllink): # 获取赏析和翻译的文档 并 调用�
             sxfinal = sxfinal.replace(findstr1[0], '')
             sxfinal = sxfinal.replace(findstr2[0], '')
             sxfinal = sxfinal.replace("▲", '')
+            sxfinal = sxfinal.replace(r"站务邮箱：service@gushiwen.org",'')
+
             print(sxfinal)
+        else:
+            sxfinal=getsimpsx(alllink)
 
     else: #如果没有获取到 赏析文档的 展开阅读Onclick ID,则调用 getsimpsx 的方式获取
         sxfinal=getsimpsx(alllink)
@@ -153,6 +161,12 @@ def getsimpfy(alllink): #获取不需要展开的时候翻译的文档
             psoup_ = BeautifulSoup(str(tg), 'html.parser')
             for pstring in psoup_.stripped_strings:
                 cont = cont + pstring + "</br>"
+
+    findstr4 = re.findall(r"</br>展开阅读全文 ∨</br>",cont)
+    print(findstr4[0],'find-------')
+    cont = cont.replace(r"</br>展开阅读全文 ∨</br>",'')
+    cont = cont.replace(r"站务邮箱：service@gushiwen.org",'')
+
     print(cont)
     return cont
 
@@ -167,6 +181,10 @@ def getsimpsx(alllink): #获取不需要展开的时候赏析的文档
             psoup_ = BeautifulSoup(str(tg), 'html.parser')
             for pstring in psoup_.stripped_strings:
                 cont = cont + pstring + "</br>"
+
+    findstr4 = re.findall(r"</br>展开阅读全文 ∨</br>",cont)
+    cont = cont.replace(r"</br>展开阅读全文 ∨</br>",'')
+    cont = cont.replace(r"站务邮箱：service@gushiwen.org",'')
     print(cont)
     return cont
 
